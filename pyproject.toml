@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logic_circuits"
+version = "0.1.0"
+description = "A package for logic circuits"
+authors = [{ name = "Fabian Helmberger", email = "helmbergerfabian@gmail.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

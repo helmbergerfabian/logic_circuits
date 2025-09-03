@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: logic_circuits
+Version: 0.1.0
+Summary: A package for logic circuits
+Author-email: Fabian Helmberger <helmbergerfabian@gmail.com>
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Dynamic: license-file
