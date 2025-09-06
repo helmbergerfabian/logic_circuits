@@ -7,3 +7,7 @@ src/logic_circuits.egg-info/SOURCES.txt
 src/logic_circuits.egg-info/dependency_links.txt
 src/logic_circuits.egg-info/requires.txt
 src/logic_circuits.egg-info/top_level.txt
+src/logic_circuits/gates/gates.py
+src/logic_circuits/gates/port.py
+src/logic_circuits/utils/__init__.py
+src/logic_circuits/utils/base_classes.py
