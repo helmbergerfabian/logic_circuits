@@ -27,4 +27,4 @@ class Port:
 
     @value.setter
     def value(self, v: Union[bool, np.ndarray]) -> None:
-        self.state = v 
+        self.state = v
