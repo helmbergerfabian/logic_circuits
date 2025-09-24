@@ -51,81 +51,56 @@ class SysIN(GateBase):
 
 
 
-
 class GateNOT(GateBase):
-    def __init__(self, input_gates: Union[GateBase, List[GateBase]], input_ports: List[int], name = "NOT"):
-
-        self.name = name 
-        self._src_gates, self._src_gates_ports = input_gates, input_ports
-
-        if isinstance(input_gates, GateBase):
-            self.a_src_gate = self._src_gates
-        elif isinstance(input_gates, List) and len(input_gates) == 1:
-            self.a_src_gate = self._src_gates[0]
-        else: raise TypeError("Pass a single src gate as object or list of len 1 as well as a port index as int or list of len 1")
-        
-        a = _read(self.a_src_gate, self._src_gates_ports[0])
-
-        if a.size != 1:
-            raise ValueError("NOT inputs must have length 1.")
-        super().__init__(n_outputs=a.size, name="NOT")
+    def __init__(self, name = "NOT"):
 
         self.num_in = 1
         self.num_out = 1
+        self.name = name 
 
-        self._recompute()
+        self.from_gate: List[GateBase] = []
+        self.from_port: List[int] = []
+        self.to_port: List[int] = []
+        self.brigde = np.zeros(self.num_in, dtype=bool)
+
+        super().__init__(n_outputs=1, name="NOT")
+
 
     def _compute(self) -> np.ndarray:
-        self.a_src_gate._recompute()
+        if len(np.unique(self.to_port)) == self.num_in:
+            for g in self.from_gate: 
+                g._recompute()
 
-        x = _read(self.a_src_gate, self._src_gates_ports)
-        return np.logical_not(x)
+            for _from_gate, _from_port, _to_port in zip(self.from_gate, self.from_port, self.to_port):
+                self.brigde[_to_port] = _read(_from_gate, _from_port)
 
+            return np.logical_not(self.brigde[0])
+        else: raise Exception(f"Gate {self.name} not fully wired up")
 
 class GateAND(GateBase):
     """Elementwise AND. Both inputs must have the same width."""
-    # def __init__(self, inputs: Tuple[Tuple[HasState, Idxs], Tuple[HasState, Idxs]]):
-    def __init__(self, input_gates: Union[GateBase, List[GateBase]], input_ports: List[int], name = "AND"):
-        
-        self.name = name
-
-        self._src_gates, self._src_gates_ports = input_gates, input_ports
-
-        if isinstance(input_gates, GateBase):
-            # connected to only one gate
-            self.a_src_gate, self.b_src_gate = self._src_gates, self._src_gates
-        elif isinstance(input_gates, List) and len(input_gates) == 2:
-            # connected to mulitple gates
-            self.a_src_gate, self.b_src_gate = self._src_gates
-        else: raise TypeError("Pass a src gates as a single object or as a list of len 2 as well as a index port as a list of len 2")
-
-        a = _read(self.a_src_gate, self._src_gates_ports[0])
-        b = _read(self.b_src_gate, self._src_gates_ports[1])
-
-        if a.size != b.size:
-            raise ValueError("AND inputs must have the same width.")
-        super().__init__(n_outputs=a.size, name="AND")
-
+    def __init__(self, name = "NOT"):
+        super().__init__(n_outputs=1, name="AND")
         self.num_in = 2
         self.num_out = 1
+        self.name = name 
 
-        self._recompute()
-
-    # def wire_up(self, con):
-    #     s_gate, s_port, e_gate, e_port = con
-    #     self.a_src_gate = s_gate
-    #     self.b_src_gate =
+        self.from_gate: List[GateBase] = []
+        self.from_port: List[int] = []
+        self.to_port: List[int] = []
+        self.brigde = np.zeros(self.num_in, dtype=bool)
 
     def _compute(self) -> np.ndarray:
-        for gate in [self.a_src_gate, self.b_src_gate]:
-            gate._recompute()
+        if len(np.unique(self.to_port)) == self.num_in:
+            for g in self.from_gate: 
+                g._recompute()
 
-        a = _read(self.a_src_gate, self._src_gates_ports[0])
-        b = _read(self.b_src_gate, self._src_gates_ports[1])
+            for _from_gate, _from_port, _to_port in zip(self.from_gate, self.from_port, self.to_port):
+                self.brigde[_to_port] = _read(_from_gate, _from_port)
 
-        return np.logical_and(a, b)
-    
-
+            return np.logical_and(*self.brigde)
+        else: raise Exception(f"Gate {self.name} not fully wired up")
+        
 
 def truthtable(gate: GateBase, inputs: SysIN):
     cols = "  ".join([f"I{i}" for i in range(inputs.num_out)])
@@ -158,18 +133,46 @@ class generic_gate(GateBase):
         return np.concatenate([g.state for g in self.out_gates])
     
 
-# class generic_gate(GateBase):
+from typing import List, Type
 
-#     def __init__(self, input_gates: List[List[GateBase]], input_ports: List[List[int]], name = "AND"):
-        
-#         self.name = name
-#         self._src_gates, self._src_gates_ports = input_gates, input_ports
-#         n_outputs = 
-#         super().__init__(n_outputs=, name="AND")
+def make_combined_gate_class(
+    name: str,
+    connections,
+    end_gates: List[GateBase],
+    num_in: int,
+    num_out: int
+) -> Type[GateBase]:
+    """
+    Factory that creates a new composite gate class.
+    """
 
-#     def _compute(self) -> np.ndarray:
-#         for gate in self.out_gates:
-#             gate._recompute()
+    class _CombinedGate(GateBase):
+        def __init__(self, instance_name=None):
+            # call GateBase init
+            super().__init__(n_outputs=num_out, name=instance_name or name)
+            self.wire_idx = 0
+            self.num_in = num_in
+            self.num_out = num_out
+            self.name = instance_name or name
 
-#         return np.concatenate([g.state for g in self.out_gates])
-    
+            # instantiate fresh copies of the sub-gates
+            self._subgates = {g.name: type(g)(g.name) for g in end_gates}
+            
+            # rebuild wiring
+            for from_gate, to_gate, from_port, to_port in connections:
+                self.wire_up(from_gate, to_gate, from_port, to_port)
+
+            self.end_gates = end_gates
+
+        def wire_up(self, from_gate: GateBase, to_gate: GateBase, from_port: int, to_port: int):
+            to_gate.wire_up(from_gate, to_gate, from_port, to_port)
+            self.wire_idx += 1
+
+        def _compute(self) -> np.ndarray:
+            end_state = []
+            for eg in self.end_gates:
+                end_state += list(eg.state)
+            return np.array(end_state)
+
+    _CombinedGate.__name__ = name
+    return _CombinedGate

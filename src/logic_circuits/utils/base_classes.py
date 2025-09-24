@@ -21,6 +21,11 @@ class GateBase(HasState):
             raise ValueError("n_outputs must be >= 1")
         self._outs: List[Port] = [Port(self) for _ in range(n_outputs)]
 
+        self.from_gate = []
+        self.to_gate = []
+        self.from_port: List[int] = []
+        self.to_port: List[int] = []
+        
     @property
     def out_ports(self) -> List[Port]:
         return self._outs
@@ -45,3 +50,10 @@ class GateBase(HasState):
 
     def _compute(self) -> np.ndarray:
         raise NotImplementedError
+    
+    def wire_up(self, from_gate, to_gate, from_port: int, to_port: int):
+
+        self.from_gate.append(from_gate)
+        self.to_gate.append(to_gate)
+        self.from_port.append(from_port)
+        self.to_port.append(to_port)
