@@ -11,15 +11,11 @@ from typing import (
     Type
 )
 import numpy as np
-import itertools
 
 
 def _read(src: GateBase, idxs: Idxs) -> np.ndarray:
     s = np.concatenate([p.state for p in src._outs])
-    if isinstance(idxs, int):
-        return np.array([bool(s[idxs])], dtype=bool)
-    
-    return np.array([bool(s[i]) for i in idxs], dtype=bool)
+    return np.array(s[idxs], dtype=bool, ndmin=1)
 
 
 class GateNOT(GateBase):
@@ -28,33 +24,18 @@ class GateNOT(GateBase):
         super().__init__(num_in, num_out, name=name)
 
     def _compute(self) -> np.ndarray:
-        if len(np.unique(self.to_port)) == self.num_in:
-            for g in self.from_gate: 
-                g._recompute()
-
-            for _from_gate, _from_port, _to_port in zip(self.from_gate, self.from_port, self.to_port):
-                self.brigde[_to_port] = _read(_from_gate, _from_port)
-
-            return np.logical_not(self.brigde[0])
-        else: raise Exception(f"Gate {self.name} not fully wired up. ports {np.unique(self.to_port)}")
-
+        inputs = self._collect_inputs()
+        return np.logical_not(inputs[0])
+    
 
 class GateAND(GateBase):
     """Elementwise AND. Both inputs must have the same width."""
     def __init__(self, name = "AND", num_in=2, num_out=1):
         assert (num_in==2 and num_out==1), "Not gate must have one/one I/O"
         super().__init__(num_in, num_out, name=name)
-
     def _compute(self) -> np.ndarray:
-        if len(np.unique(self.to_port)) == self.num_in:
-            for g in self.from_gate: 
-                g._recompute()
-
-            for _from_gate, _from_port, _to_port in zip(self.from_gate, self.from_port, self.to_port):
-                self.brigde[_to_port] = _read(_from_gate, _from_port)
-
-            return np.logical_and(*self.brigde)
-        else: raise Exception(f"Gate {self.name} not fully wired up")
+        inputs = self._collect_inputs()
+        return np.logical_and(*inputs)
 
 
 class GatePASS(GateBase):
@@ -92,20 +73,6 @@ class SysIN(GatePASS):
         return _read(self, [idx for idx in range(self.num_out)])
 
 
-def truthtable(gate: GateBase, inputs: SysIN):
-    cols = "  ".join([f"I{i}" for i in range(inputs.num_out)])
-
-    print(f"{cols}   |  {getattr(gate, 'name', gate.name)}")
-    print("-" * (4*inputs.num_out + 10))
-
-    for combo in itertools.product([False, True], repeat=inputs.num_out):
-        inputs.set_state(np.arange(inputs.num_out), list(combo))
-
-        out = np.array(gate.state, dtype=int)
-        bits = "   ".join(str(int(b)) for b in combo)
-        
-        print(f"{bits}   |  {out}")
-
 
 def make_combined_gate_class(
     name: str,
@@ -126,10 +93,6 @@ def make_combined_gate_class(
             self.wire_idx = 0
             self.name = instance_name or name
 
-            # instantiate fresh copies of the sub-gates
-            # self._subgates = {g.name: type(g)(name = g.name, *args, **kwargs) for g in end_gates}
-            
-            # rebuild wiring
             for from_gate, to_gate, from_port, to_port in connections:
                 self.wire_up(from_gate, to_gate, from_port, to_port)
 

@@ -1,5 +1,6 @@
 from typing import Protocol, Iterable, List, Union
 from logic_circuits.gates.port import Port
+import logic_circuits.gates.gates as gates
 import numpy as np
 
 Idxs = Union[int, Iterable[int]]
@@ -56,8 +57,20 @@ class GateBase(HasState):
         raise NotImplementedError
     
     def wire_up(self, from_gate, to_gate, from_port: int, to_port: int):
-
+        assert from_gate != to_gate, "No self wiring is allowed"
         self.from_gate.append(from_gate)
         self.to_gate.append(to_gate)
         self.from_port.append(from_port)
         self.to_port.append(to_port)
+
+    def _collect_inputs(self) -> List[np.ndarray]:
+        if len(np.unique(self.to_port)) != self.num_in:
+            raise Exception(f"Gate {self.name} not fully wired up. ports {np.unique(self.to_port)}")
+
+        for g in self.from_gate:
+            g._recompute()
+
+        for _from_gate, _from_port, _to_port in zip(self.from_gate, self.from_port, self.to_port):
+            self.brigde[_to_port] = gates._read(_from_gate, _from_port)
+
+        return self.brigde
