@@ -11,25 +11,29 @@ class HasState(Protocol):
 
 class GateBase(HasState):
     """Single node with k>=1 output wires; concrete gates implement _compute()."""
-    def __init__(self, n_outputs: int, name: str):
-        self.num_in = 1
-        self.num_out = 1
+    def __init__(self, num_in: int = 1, num_out: int = 1, name: str = None):
+        if num_in < 1 or num_out < 1:
+            raise ValueError("number of I/O must be >= 1")
 
-        self.base_layer = False
+        self.num_in = num_in
+        self.num_out = num_out
         self.name = name
-        if n_outputs < 1:
-            raise ValueError("n_outputs must be >= 1")
-        self._outs: List[Port] = [Port(self) for _ in range(n_outputs)]
 
-        self.from_gate = []
-        self.to_gate = []
+        self._outs: List[Port] = [Port(self) for _ in range(self.num_out)]
+        self.base_layer = False
+
+        # buffer
+        self.brigde = np.zeros(self.num_in, dtype=bool)
+
+        # wiring
+        self.from_gate: List["GateBase"] = []
         self.from_port: List[int] = []
+        self.to_gate: List["GateBase"] = []
         self.to_port: List[int] = []
         
     @property
     def out_ports(self) -> List[Port]:
         return self._outs
-    
 
     @property
     def state(self) -> np.ndarray:
