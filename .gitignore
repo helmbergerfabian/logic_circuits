@@ -220,3 +220,4 @@ __marimo__/
 *.ipynb
 *.DS_Store
 *.pyc
+*.egg-info
