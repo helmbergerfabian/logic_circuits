@@ -1,0 +1,12 @@
+# Centralized colors
+BG          = (24, 26, 32)
+GRID        = (36, 39, 48)
+BLOCK_FILL  = (50, 54, 66)
+BLOCK_OUTL  = (90, 96, 120)
+PORT_IN     = (75, 180, 115)
+PORT_OUT    = (90, 170, 255)
+PORT_HOVER  = (255, 210, 90)
+WIRE_FALSE  = (200, 200, 220)
+WIRE_HOT    = (255, 230, 140)
+TEXT        = (220, 225, 235)
+WIRE_TRUE   = (255, 0, 0)
