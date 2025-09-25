@@ -92,7 +92,7 @@ class GateAND_graphical(GateAND):
         pygame.draw.rect(surf, BLOCK_OUTL, self.rect, 2, border_radius=self.CORNER)
         if fonts.FONT:
             label = fonts.FONT.render(self.name, True, TEXT)
-            label_rect = label.get_rect(center=(self.rect.centerx, self.rect.centery-30))
+            label_rect = label.get_rect(center=(self.rect.centerx, self.rect.centery-35))
             surf.blit(label, label_rect) 
             
         mx, my = pygame.mouse.get_pos()
@@ -199,15 +199,23 @@ class GatePass_graphical(GatePASS):
     def draw(self, surf):   
         pygame.draw.rect(surf, BLOCK_FILL, self.rect, border_radius=self.CORNER)
         pygame.draw.rect(surf, BLOCK_OUTL, self.rect, 2, border_radius=self.CORNER)
-        pygame.draw.rect(surf, (255, 255, 0), self.plus)
+
+        # --- center plus & minus horizontally ---
+        self.plus.centerx = self.rect.centerx
+        self.minus.centerx = self.rect.centerx
+
+        pygame.draw.rect(surf, (0, 255, 0), self.plus)
         pygame.draw.rect(surf, (255, 0, 0), self.minus)
+
         if fonts.FONT:
             label = fonts.FONT.render(self.name, True, TEXT)
             label_rect = label.get_rect(center=(self.rect.centerx, self.rect.centery))
             surf.blit(label, label_rect)
+
         mx, my = pygame.mouse.get_pos()
         for p in self.inputs + self.outputs:
             p.draw(surf, p.hover((mx, my)))
+
 
 
 
@@ -256,15 +264,17 @@ class SysIN_graphical(SysIN):
     def hover_minus(self, mouse):
         return self.minus.collidepoint(mouse)
     
-    # def move_by(self, dx, dy):
-    #     self.rect.move_ip(dx, dy)
-    #     self.plus.move_ip(dx, dy)
-
     def draw(self, surf):   
         pygame.draw.rect(surf, BLOCK_FILL, self.rect, border_radius=self.CORNER)
         pygame.draw.rect(surf, BLOCK_OUTL, self.rect, 2, border_radius=self.CORNER)
-        pygame.draw.rect(surf, (255, 255, 0), self.plus)
+
+        # --- center plus & minus horizontally ---
+        self.plus.centerx = self.rect.centerx
+        self.minus.centerx = self.rect.centerx
+
+        pygame.draw.rect(surf, (0, 255, 0), self.plus)
         pygame.draw.rect(surf, (255, 0, 0), self.minus)
+
         if fonts.FONT:
             label = fonts.FONT.render(self.name, True, TEXT)
             label_rect = label.get_rect(center=(self.rect.centerx, self.rect.centery))
