@@ -131,8 +131,8 @@ def main():
                     if mx > LIBRARY_WIDTH:
                         new_gate = dragging_library_item.gate_class(
                             f"{dragging_library_item.text.lower()}",
-                            x=mx,
-                            y=my,
+                            x=mx-50,
+                            y=my-50,
                             w=100, h=100
                         )
                         blocks.append(new_gate)
