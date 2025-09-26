@@ -215,19 +215,19 @@ def main():
         # Dragging gates around
         # -------------------
         if drag_start_gate_g:
-            drag_start_gate_g.rect.topleft = (
-                mx - block_drag_offset.x,
-                my - block_drag_offset.y,
-            )
+            grid_size = 10
+            snapped_x = (mx - block_drag_offset.x) // grid_size * grid_size
+            snapped_y = (my - block_drag_offset.y) // grid_size * grid_size
+            drag_start_gate_g.rect.topleft = (snapped_x, snapped_y)
             drag_start_gate_g._make_ports()
             if isinstance(drag_start_gate_g, (SysIN_graphical, GatePass_graphical)):
                 drag_start_gate_g.plus.topleft = (
-                    mx - block_drag_offset.x + drag_start_gate_g._w/2,
-                    my - block_drag_offset.y,
+                    snapped_x + drag_start_gate_g._w // 2,
+                    snapped_y,
                 )
                 drag_start_gate_g.minus.topleft = (
-                    mx - block_drag_offset.x + drag_start_gate_g._w/2,
-                    my - block_drag_offset.y + drag_start_gate_g._h - drag_start_gate_g._h/10,
+                    snapped_x + drag_start_gate_g._w // 2,
+                    snapped_y + drag_start_gate_g._h - drag_start_gate_g._h // 10,
                 )
 
         # -------------------
