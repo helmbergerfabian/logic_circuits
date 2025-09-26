@@ -5,4 +5,7 @@ channels:
 dependencies:
   - pip
   - ipykernel
+  - python=3.10
+  - pygame
+  - numpy
 prefix: /home/fabianhelmberger/miniconda3/envs/logic_circuits
