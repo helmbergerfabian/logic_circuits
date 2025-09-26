@@ -17,4 +17,4 @@ git clone https://github.com/yourusername/logic-circuits.git
 cd logic-circuits
 conda env create -f environment.yml
 conda activate logic-circuits
-pip install . -e
+pip install -e .
