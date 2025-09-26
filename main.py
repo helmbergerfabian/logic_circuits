@@ -85,7 +85,7 @@ def main():
                 for item in library_items:
                     if item.hover((mx, my)):
                         dragging_library_item = item
-                        ghost_gate = item.gate_class("", x=mx, y=my, w=100, h=100)
+                        ghost_gate = item.gate_class("", x=mx-100/2, y=my-100/2, w=100, h=100)
                         break
                 else:
                     # Normal port/gate drag logic
