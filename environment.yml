@@ -1,11 +1,9 @@
 name: logic_circuits
 channels:
-  - https://repo.anaconda.com/pkgs/main
-  - https://repo.anaconda.com/pkgs/r
+  - conda-forge
 dependencies:
   - pip
   - ipykernel
   - python=3.10
   - pygame
   - numpy
-prefix: /home/fabianhelmberger/miniconda3/envs/logic_circuits
