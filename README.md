@@ -13,8 +13,8 @@ You can place gates, wire them together, and generate truth tables.
 Clone the repo and create the environment:
 
 ```bash
-git clone https://github.com/yourusername/logic-circuits.git
-cd logic-circuits
+git clone https://github.com/helmbergerfabian/logic_circuits.git
+cd logic_circuits
 conda env create -f environment.yml
-conda activate logic-circuits
+conda activate logic_circuits
 pip install -e .
