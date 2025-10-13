@@ -10,15 +10,18 @@ from logic_circuits.pygame_representation.utils import (
     truthtable_print
 )
 from logic_circuits.pygame_representation.gates_graphical import (
-    GatePass_graphical, SysIN_graphical
+    GateGENERIC_graphical,
+    GatePass_graphical,
+    SysIN_graphical,
 )
 from logic_circuits.pygame_representation.wires import Wire
 from logic_circuits.pygame_representation.button import Button
-from logic_circuits.pygame_representation.library import library_items
+from logic_circuits.pygame_representation.library import (
+    library_items,
+    add_library_item,
+)
 from logic_circuits.pygame_representation.pygame_cfg import *
 from logic_circuits.gates.gates import make_combined_gate_class
-
-
 def main():
     # -------------------
     # INIT
@@ -33,6 +36,15 @@ def main():
     # -------------------
     # UI ELEMENTS
     # -------------------
+    save_button = Button(
+        rect=(W - 280, 20, 120, 40),
+        text="Save",
+        font=fonts.FONT,
+        bg_color=(70, 70, 200),
+        fg_color=(255, 255, 255),
+        hover_color=(90, 90, 220),
+    )
+
     play_button = Button(
         rect=(W - 140, 20, 120, 40),
         text="Play",
@@ -65,6 +77,7 @@ def main():
     block_drag_offset = Vector2(0, 0)
 
     truth_lines = None
+    custom_gate_count = 0
     running = True
 
     # -------------------
@@ -197,6 +210,12 @@ def main():
             # -------------------
             # PLAY BUTTON
             # -------------------
+            if save_button.handle_event(event):
+                if len(connections) > 0:
+                    custom_gate_count += 1
+                    base_name = f"Custom{custom_gate_count}"
+                    add_library_item(base_name.upper(), GateGENERIC_graphical)
+
             if play_button.handle_event(event):
                 if len(connections) > 0:
                     new_gate = make_combined_gate_class(
@@ -280,6 +299,7 @@ def main():
             )
             screen.blit(hint, (12, 10))
 
+        save_button.draw(screen)
         play_button.draw(screen)
         if truth_lines:
             x, y = LIBRARY_WIDTH + 20, H - 150   # position bottom right
