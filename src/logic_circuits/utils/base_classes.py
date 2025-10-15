@@ -64,8 +64,8 @@ class GateBase(HasState):
         self.to_port.append(to_port)
 
     def _collect_inputs(self) -> List[np.ndarray]:
-        if len(np.unique(self.to_port)) != self.num_in:
-            raise Exception(f"Gate {self.name} not fully wired up. ports {np.unique(self.to_port)}")
+        # if len(np.unique(self.to_port)) != self.num_in:
+        #     raise Exception(f"Gate {self.name} not fully wired up. ports {np.unique(self.to_port)}")
 
         for g in self.from_gate:
             g._recompute()
