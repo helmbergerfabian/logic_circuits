@@ -2,13 +2,19 @@ import pygame
 from pygame.math import Vector2
 from .utils import cubic_bezier
 from .colors import WIRE_FALSE, WIRE_TRUE, WIRE_HOT
+from logic_circuits.gates.port import Port
 
 class Wire:
-    def __init__(self, start_port, end_port):
+    def __init__(self, start_port: Port, end_port: Port):
         assert start_port.kind == 'out' and end_port.kind == 'in'
         self.a = start_port
         self.b = end_port
+        self.parent_gate = self.a.gate
         self.col = WIRE_FALSE
+        # print(f"connecting {self.a, self.b}")
+        # print(f"start {self.a.state,}")
+        # print(f"end {self.b.state,}")
+
 
     def hit_test(self, mouse, tol=6):
         pts = self._points()
@@ -32,9 +38,9 @@ class Wire:
         return cubic_bezier(p0, c1, c2, p3, steps=36)
 
     def draw(self, surf, hot=False):
-        if not self.a.state: self.col = WIRE_TRUE
-        else: self.col = WIRE_FALSE
-
+        if not self.parent_gate.state[self.a.index]: self.col = WIRE_FALSE
+        else: self.col = WIRE_TRUE
+        
         pts = self._points()
         pygame.draw.lines(surf, WIRE_HOT if hot else self.col, False, pts, 3)
         if len(pts) >= 2:
