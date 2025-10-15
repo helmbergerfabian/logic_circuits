@@ -18,7 +18,7 @@ from logic_circuits.pygame_representation.library import library_items
 from logic_circuits.pygame_representation.pygame_cfg import *
 from logic_circuits.gates.gates import make_combined_gate_class
 
-
+import numpy as np
 def main():
     # -------------------
     # INIT
@@ -91,7 +91,6 @@ def main():
                     # Normal port/gate drag logic
                     port_g = port_under_mouse((mx, my), blocks)
                     gate_g = block_under_mouse((mx, my), blocks)
-
                     if port_g and port_g.kind == "out":
                         drag_start_port_g = port_g
                         port_drag_pos = Vector2(mx, my)
@@ -106,11 +105,24 @@ def main():
                             b.increase_ports()
                             wires = cut_wired(wires, b)
 
+                        # if isinstance(b, SysIN_graphical):
+                        #     b.
+
                         if b.hover_minus((mx, my)):
                             b.decrease_ports()
                             wires = cut_wired(wires, b)
 
-            # -------------------
+            elif event.type == pygame.KEYDOWN:
+                state_now = sysin.state.copy()
+                n = sum(b << i for i, b in enumerate(reversed(state_now)))  # 2
+
+                # add 1, wrap around
+                n = (n + 1) % (1 << len(state_now))  # (2 + 1) % 4 = 3
+
+                # back to bools
+                out = [(n >> i) & 1 == 1 for i in reversed(range(len(state_now)))]  # [True, True]
+                sysin.set_state(np.arange(len(state_now)), out)
+
             # MOUSE MOVE
             # -------------------
             elif event.type == pygame.MOUSEMOTION:
@@ -143,7 +155,11 @@ def main():
                     drag_stop_port_g = port_under_mouse((mx, my), blocks, kind="in")
                     if drag_stop_port_g and drag_stop_port_g != drag_start_port_g:
                         if drag_start_port_g.gate != drag_stop_port_g.gate:
+                            drag_stop_port_g.gate.wire_up(gate_g, drag_stop_port_g.gate, drag_start_port_g.index, drag_stop_port_g.index)
+                            
                             wires.append(Wire(drag_start_port_g, drag_stop_port_g))
+                            print(f"wiring {drag_start_port_g.gate.name}[{drag_start_port_g.index}] -> {drag_stop_port_g.gate.name}[{drag_stop_port_g.index}]")
+                            
                             connections.append(
                                 (
                                     drag_start_port_g.gate,
@@ -274,7 +290,7 @@ def main():
 
         else:
             hint = fonts.FONT.render(
-                "LMB drag block | LMB drag from output→input | RMB delete wire/gate",
+                f"LMB drag block | LMB drag from output→input | RMB delete wire/gate \n UP/DOWN toggle input",
                 True,
                 TEXT,
             )
