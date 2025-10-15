@@ -3,6 +3,7 @@ from .colors import GRID
 import io, contextlib
 import tkinter as tk
 from .pygame_cfg import *
+from logic_circuits.gates.gates import GateBase,SysIN
 
 
 def draw_grid(surface, W, H, gap=24):
@@ -33,10 +34,12 @@ def cut_wired(wires, gate):
     ]
     return new_wires
 
-def all_ports(blocks):
+from typing import List
+from logic_circuits.utils.base_classes import Port
+def all_ports(blocks) -> List[Port]:
     return [p for b in blocks for p in b.inputs + b.outputs]
 
-def block_under_mouse(mouse, blocks) -> None:
+def block_under_mouse(mouse, blocks: List[GateBase]) -> GateBase:
     for b in blocks:
         if b.hover(mouse):
             return b
@@ -57,7 +60,6 @@ def find_wire_under_mouse(mouse, wires):
 import itertools
 
 
-from logic_circuits.gates.gates import GateBase,SysIN
 import numpy as np
 def truthtable(gate: GateBase, inputs: SysIN):
     cols = "  ".join([f"I{i}" for i in range(inputs.num_out)])
